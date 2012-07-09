@@ -1,8 +1,10 @@
-Small SBT plugin that will mimic the behaviour of the maven-tag-list plugin when done.
+# About
+
+Small SBT plugin that will contain roughly the functionality of the maven-tag-list plugin when done.
 
 
 The plugin contains the task "tag-list" which performs a case insensitive search in the sources 
-for a set of keywords. The default keywords are "todo" and "fixme"
+of a project for a set of keywords. The default keywords are "todo" and "fixme"
 
 # Installation
 
