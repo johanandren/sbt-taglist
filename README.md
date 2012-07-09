@@ -8,8 +8,8 @@ for a set of keywords. The default keywords are "todo" and "fixme"
 
 Add the following lines to ~/.sbt/plugins/build.sbt or PROJECT_DIR/project/plugins.sbt:
 
-    resolvers += Resolver.url("sbt-taglist-releases", new URL("http://johanandren.github.com/releases/"))(Resolver.ivyStylePatterns)
-    
+    resolvers += "sbt-taglist-releases" at "http://johanandren.github.com/releases/"
+
     addSbtPlugin("com.markatta" % "taglist-plugin" % "1.1")
 
 
@@ -21,7 +21,7 @@ And then this line to PROJECT_DIR/build.sbt to include the task tag-list into yo
 # Configuration
 The plugin uses the regular source settings for your sbt-project so it should work out of the box with non-standard directory structures etc. 
 
-If you want to change what keywords the plugin searches for you can do so by modifying or appending like this in PROJECT_DIR/build.sbt:
+If you want to change what keywords the plugin searches for you can do so by modifying tagWords like this in PROJECT_DIR/build.sbt:
 
-    TagListPlugin.TagListKeys.tagWords += "laters"
+    TagListPlugin.TagListKeys.tagWords := Set("wha", "oughtaimprove", "noway", "bad code")
 
