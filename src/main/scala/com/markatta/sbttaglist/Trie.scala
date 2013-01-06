@@ -24,7 +24,7 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
     add(word.toList, this)
   }
 
-  def contains(word: String): Boolean = {
+  def contains(word: String, skipChars:Set[Char]): Boolean = {
     @tailrec
     def exists(word: List[Char], trie: Trie): Boolean = word match {
       // end of given word, is that node in the trie marked as a word?
@@ -38,11 +38,20 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
         case Some(nextTrie) => exists(tail, nextTrie)
       }
     }
-    exists(word.toList, this)
+
+    def skip(word:List[Char]) = {
+      def drop(c:List[Char]) = skipChars.foldLeft(c) { (acc, w) =>
+        acc.dropWhile(_ == w)
+      } 
+
+      drop(drop(word).reverse).reverse
+    }
+
+    exists(skip(word.toList), this)
   }
 
-  def containsAnyIn(line: String): Boolean =
-    line.split(" ").exists(contains(_))
+  def containsAnyIn(line: String, skipChars:Set[Char] = Set()): Boolean =
+    line.split(" ").exists(contains(_, skipChars))
 
 }
 
