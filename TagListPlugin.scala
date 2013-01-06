@@ -36,7 +36,7 @@ object TagListPlugin extends Plugin {
         (file, tags) <- tagList;
         (lineNumber, tagLine) <- tags
       ) {
-        streams.log.warn(file.getName + ":" + lineNumber + ": " + tagLine.trim)
+        streams.log.warn(file.getName + ":" + (lineNumber + 1) + ": " + tagLine.trim)
       }
 
       tagList
