@@ -24,7 +24,7 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
     add(word.toList, this)
   }
 
-  def contains(word: String, skipChars:Set[Char]): Boolean = {
+  def contains(word: String, skipChars:Set[Char]): (Boolean, String) = {
     @tailrec
     def exists(word: List[Char], trie: Trie): Boolean = word match {
       // end of given word, is that node in the trie marked as a word?
@@ -39,23 +39,25 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
       }
     }
 
-    def skip(word:List[Char]) = {
-      def drop(c:List[Char]) = skipChars.foldLeft(c) { (acc, w) =>
-        acc.dropWhile(_ == w)
-      } 
-
-      drop(drop(word).reverse).reverse
-    }
-
-    exists(skip(word.toList), this)
+    (exists(Trie.skip(word.toLowerCase.toList, skipChars), this), Trie.skip(word.toList, skipChars).mkString)
   }
 
-  def containsAnyIn(line: String, skipChars:Set[Char] = Set()): Boolean =
-    line.split(" ").exists(contains(_, skipChars))
-
+  def containsWordsInLine(line: String, skipChars:Set[Char] = Set()): Seq[String] = {
+    line.split(" ").map { word =>
+      contains(word, skipChars)
+    }.filter(_._1).map(_._2).distinct
+  }
 }
 
 object Trie {
+
+  def skip(word:List[Char], skipChars:Set[Char]) = {
+    def drop(c:List[Char]) = skipChars.foldLeft(c) { (acc, w) =>
+      acc.dropWhile(_ == w)
+    } 
+
+    drop(drop(word).reverse).reverse
+  }
 
   def apply(words: Iterable[String]): Trie =
     words.foldLeft(Trie()){(trie, word) => trie :+ word }

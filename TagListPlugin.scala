@@ -5,11 +5,18 @@ import sbt._
 import Keys._
 
 object TagListPlugin extends Plugin {
+  sealed trait LogLevel
+  case object Warn extends LogLevel
+  case object Info extends LogLevel
+  case object Error extends LogLevel
+  case object Debug extends LogLevel
 
-  type TagList = Seq[(File, Seq[(Int, String)])]
-  
+  type TagList = Seq[(File, Seq[(String, Int, String)])]
+
+  case class Tag(tag:String, level:LogLevel = Warn)
+ 
   object TagListKeys {
-    val tagWords = SettingKey[Set[String]]("tag-list-words", "Tag words to look for when searching for tagged files")
+    val tagWords = SettingKey[Set[Tag]]("tag-list-words", "Tag words to look for when searching for tagged files")
     val skipChars = SettingKey[Set[Char]]("tag-list-skip-chars", "Characters to skip around tag words")
     val tagList = TaskKey[TagList]("tag-list", "Display all TODO tags in the sources of the project")
   }
@@ -18,30 +25,45 @@ object TagListPlugin extends Plugin {
 
   lazy val tagListSettings = Seq(
     tagListTask,
-    tagWords := Set("todo", "fixme"),
+    tagWords := Set(Tag("todo"), Tag("fixme", Error)),
     skipChars := Set('/', ':')
   )
+  
+  def log(logger:Logger, msg:String, level:LogLevel) = level match {
+    case Warn => logger.warn(msg)
+    case Info => logger.info(msg)
+    case Error => logger.error(msg)
+    case Debug => logger.debug(msg)
+  }
 
   lazy val tagListTask = tagList <<= (sources in Compile, tagWords, streams, skipChars) map {
-    case (sources: Seq[File], tagWords: Set[String], streams: TaskStreams, skipChars:Set[Char]) => {
-      val tagList = FileParser.generateTagList(sources, tagWords, skipChars)
+    case (sources: Seq[File], tagWords: Set[Tag], streams: TaskStreams, skipChars: Set[Char]) => {
+      val map = tagWords.map { t =>
+        (Trie.skip(t.tag.toList, skipChars).mkString, t.level)
+      }.toMap[String, LogLevel]
+
+      val tagList = FileParser.generateTagList(sources, map.keys.toSet, skipChars)
 
       val count = tagList.foldLeft(0) { (acc, tags) =>
         acc + tags._2.length
       }
 
-      streams.log.warn("Tags found: %s" format count)
+      val msg = "Tags found: %s" format count
+
+      log(streams.log, msg, Info)
+      log(streams.log, "-----------------------", Info)
 
       for (
         (file, tags) <- tagList;
-        (lineNumber, tagLine) <- tags
+        (tagName, lineNumber, tagLine) <- tags
       ) {
-        streams.log.warn(file.getName + ":" + lineNumber + ": " + tagLine.trim)
+        map.get(tagName).map { level =>
+          log(streams.log, "[%s] %s:%s: %s" format (tagName, file.getName, lineNumber, tagLine.trim), level)
+        }
       }
 
       tagList
     }
-
   }
 
   private object FileParser {
@@ -54,17 +76,13 @@ object TagListPlugin extends Plugin {
         }
       }
 
-    def findTags(file: File, tags: Set[String], skipChars:Set[Char]): Seq[(Int, String)] = {
+    def findTags(file: File, tags: Set[String], skipChars:Set[Char]): Seq[(String, Int, String)] = {
       val trie = Trie(tags.map(_.toLowerCase))
 
       Source.fromFile(file).getLines.zipWithIndex.flatMap { case (line, number) =>
-        if (trie.containsAnyIn(line.toLowerCase, skipChars)) {
-          Some((number, line))
-        } else {
-          None
-        }
+        trie.containsWordsInLine(line, skipChars).map((_, number, line))
       }.toSeq
     }
   }
-
 }
+
