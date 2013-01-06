@@ -10,6 +10,7 @@ object TagListPlugin extends Plugin {
   
   object TagListKeys {
     val tagWords = SettingKey[Set[String]]("tag-list-words", "Tag words to look for when searching for tagged files")
+    val skipChars = SettingKey[Set[Char]]("tag-list-skip-chars", "Characters to skip around tag words")
     val tagList = TaskKey[TagList]("tag-list", "Display all TODO tags in the sources of the project")
   }
 
@@ -17,13 +18,14 @@ object TagListPlugin extends Plugin {
 
   lazy val tagListSettings = Seq(
     tagListTask,
-    tagWords := Set("todo", "fixme")
+    tagWords := Set("todo", "fixme"),
+    skipChars := Set('/', ':')
   )
 
-  lazy val tagListTask = tagList <<= (sources in Compile, tagWords, streams) map {
-    case (sources: Seq[File], tagWords: Set[String], streams: TaskStreams) => {
+  lazy val tagListTask = tagList <<= (sources in Compile, tagWords, streams, skipChars) map {
+    case (sources: Seq[File], tagWords: Set[String], streams: TaskStreams, skipChars:Set[Char]) => {
 
-      val tagList = FileParser.generateTagList(sources, tagWords)
+      val tagList = FileParser.generateTagList(sources, tagWords, skipChars)
 
       for (
         (file, tags) <- tagList;
@@ -34,25 +36,24 @@ object TagListPlugin extends Plugin {
 
       tagList
     }
-  }
 
+  }
 
   private object FileParser {
 
-    def generateTagList(files: Seq[File], tagWords: Set[String]): TagList =
+    def generateTagList(files: Seq[File], tagWords: Set[String], skipChars:Set[Char]): TagList =
       files flatMap { file =>
-        findTags(file, tagWords) match {
+        findTags(file, tagWords, skipChars) match {
           case Seq() => Seq()
           case foundTags => Seq(file -> foundTags)
         }
       }
 
-
-    def findTags(file: File, tags: Set[String]): Seq[(Int, String)] = {
-      val trie = Trie(tags)
+    def findTags(file: File, tags: Set[String], skipChars:Set[Char]): Seq[(Int, String)] = {
+      val trie = Trie(tags.map(_.toLowerCase))
 
       Source.fromFile(file).getLines.zipWithIndex.flatMap { case (line, number) =>
-        if (trie.containsAnyIn(line.toLowerCase)) {
+        if (trie.containsAnyIn(line.toLowerCase, skipChars)) {
           Some((number, line))
         } else {
           None
