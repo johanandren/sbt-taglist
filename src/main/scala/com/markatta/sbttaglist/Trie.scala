@@ -24,40 +24,48 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
     add(word.toList, this)
   }
 
-  def contains(word: String, skipChars:Set[Char]): Boolean = {
-    @tailrec
-    def exists(word: List[Char], trie: Trie): Boolean = word match {
-      // end of given word, is that node in the trie marked as a word?
-      case Nil => trie.isWord
+  @tailrec
+  private[this] def exists(word: List[Char], trie: Trie): Boolean = word match {
+    // end of given word, is that node in the trie marked as a word?
+    case Nil => trie.isWord
 
-      case head :: tail => trie.children.get(head) match {
-        // word does not exist in trie
-        case None => false
+    case head :: tail => trie.children.get(head) match {
+      // word does not exist in trie
+      case None => false
 
-        // word this far exists in trie
-        case Some(nextTrie) => exists(tail, nextTrie)
-      }
+      // word this far exists in trie
+      case Some(nextTrie) => exists(tail, nextTrie)
     }
+  }
 
-    def skip(word:List[Char]) = {
-      def drop(c:List[Char]) = skipChars.foldLeft(c) { (acc, w) =>
-        acc.dropWhile(_ == w)
-      } 
+  def contains(word:String, skipChars:Set[Char]):Boolean =
+    exists(Trie.skip(word.toLowerCase.toList, skipChars), this)
 
-      drop(drop(word).reverse).reverse
-    }
-
-    exists(skip(word.toList), this)
+  def containsWord(word: String, skipChars:Set[Char]): (Boolean, String) = {
+    (contains(word, skipChars), word)
   }
 
   def containsAnyIn(line: String, skipChars:Set[Char] = Set()): Boolean =
     line.split(" ").exists(contains(_, skipChars))
 
+  def containsWordsInLine(line: String, skipChars:Set[Char] = Set()): Seq[String] = {
+    line.split(" ").map(containsWord(_, skipChars)).filter(_._1).map(_._2).map {
+      word => Trie.skip(word.toList, skipChars).mkString
+    }.distinct
+  }
 }
 
 object Trie {
+  def skip(word:List[Char], skipChars:Set[Char]) = {
+    def drop(c:List[Char]) = skipChars.foldLeft(c) { (acc, w) =>
+      acc.dropWhile(_ == w)
+    } 
+
+    drop(drop(word).reverse).reverse
+  }
 
   def apply(words: Iterable[String]): Trie =
     words.foldLeft(Trie()){(trie, word) => trie :+ word }
 
 }
+

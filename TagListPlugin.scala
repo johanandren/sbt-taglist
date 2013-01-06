@@ -5,11 +5,14 @@ import sbt._
 import Keys._
 
 object TagListPlugin extends Plugin {
+  import sbt.Level._
 
-  type TagList = Seq[(File, Seq[(Int, String)])]
-  
+  type TagList = Seq[(File, Seq[(String, Int, String)])]
+
+  case class Tag(tag:String, level:Level.Value = Warn)
+ 
   object TagListKeys {
-    val tagWords = SettingKey[Set[String]]("tag-list-words", "Tag words to look for when searching for tagged files")
+    val tagWords = SettingKey[Set[Tag]]("tag-list-words", "Tag words to look for when searching for tagged files")
     val skipChars = SettingKey[Set[Char]]("tag-list-skip-chars", "Characters to skip around tag words")
     val tagList = TaskKey[TagList]("tag-list", "Display all TODO tags in the sources of the project")
   }
@@ -18,28 +21,44 @@ object TagListPlugin extends Plugin {
 
   lazy val tagListSettings = Seq(
     tagListTask,
-    tagWords := Set("todo", "fixme"),
+    tagWords := Set(Tag("todo"), Tag("fixme", Error)),
     skipChars := Set('/', ':')
   )
-
+  
   lazy val tagListTask = tagList <<= (sources in Compile, tagWords, streams, skipChars) map {
-    case (sources: Seq[File], tagWords: Set[String], streams: TaskStreams, skipChars:Set[Char]) => {
-      val tagList = FileParser.generateTagList(sources, tagWords, skipChars)
+    case (sources: Seq[File], tagWords: Set[Tag], streams: TaskStreams, skipChars: Set[Char]) => {
+      val map = tagWords.map { t =>
+        (Trie.skip(t.tag.toLowerCase.toList, skipChars).mkString, t.level)
+      }.toMap[String, Level.Value]
 
-      val count = tagList.foldLeft(0) { (acc, tags) =>
-        acc + tags._2.length
-      }
+      val tagList = FileParser.generateTagList(sources, map.keys.toSet, skipChars)
 
-      streams.log.warn("Tags found: %s" format count)
-
-      for (
+      val (logs) = for (
         (file, tags) <- tagList;
-        (lineNumber, tagLine) <- tags
-      ) {
-        streams.log.warn(file.getName + ":" + lineNumber + ": " + tagLine.trim)
+        (tagName, lineNumber, tagLine) <- tags
+      ) yield {
+        map.get(tagName.toLowerCase).map { level =>
+          (() => Logger.log(streams.log, 
+            "[%s] %s:%s: %s" format (tagName, file.getName, lineNumber, tagLine.trim), level))
+        }
       }
+
+      Logger.log(streams.log, "Tags found: %s" format logs.length, Info)
+      Logger.log(streams.log, "-----------------------", Info)
+
+      logs.flatten.foreach(_())
 
       tagList
+    }
+  }
+
+  private object Logger {
+
+    def log(logger:Logger, msg:String, level:Level.Value) = level match {
+      case Warn => logger.warn(msg)
+      case Info => logger.info(msg)
+      case Error => logger.error(msg)
+      case Debug => logger.debug(msg)
     }
 
   }
@@ -54,17 +73,54 @@ object TagListPlugin extends Plugin {
         }
       }
 
-    def findTags(file: File, tags: Set[String], skipChars:Set[Char]): Seq[(Int, String)] = {
+    def findComments(lines:Iterator[String], l:String, r:String, single:Seq[String] = Seq()):Seq[String] = {
+      def balanced(s:String):Boolean = {
+        s.sliding(l.length).foldLeft(0) { (acc, a) => 
+          val b = a match {
+            case _ if a == l => 1
+            case _ if a == r => -1
+            case _ => 0
+          } 
+          b + acc
+        } == 0
+      }
+
+      val (valid, _) = lines.foldLeft((Seq[String](), false)) ({ case ((acc, comment), line) =>
+        val trimmed = line.trim
+        if (comment) {
+          if (trimmed.contains(r)) {
+            if (trimmed.endsWith(r)) {
+              (line +: acc, false)
+            } else if (trimmed.startsWith(r)) {
+              (acc, false)
+            } else {
+              (line +: acc,  balanced(line))
+            }
+          } else {
+            (line +: acc, true)
+          }
+        } else {
+          if (single.exists(trimmed.startsWith(_))) {
+            (line +: acc, false)
+          } else if (trimmed.contains(l) || trimmed.contains(r)) {
+            (line +: acc, balanced(line))
+          } else {
+            (acc, false)
+          }
+        }
+      })
+
+      valid.reverse
+    }
+
+    def findTags(file: File, tags: Set[String], skipChars:Set[Char]): Seq[(String, Int, String)] = {
       val trie = Trie(tags.map(_.toLowerCase))
 
-      Source.fromFile(file).getLines.zipWithIndex.flatMap { case (line, number) =>
-        if (trie.containsAnyIn(line.toLowerCase, skipChars)) {
-          Some((number, line))
-        } else {
-          None
-        }
+      findComments(Source.fromFile(file).getLines, "/*", "*/", List("//")).zipWithIndex.flatMap { case (line, number) =>
+        trie.containsWordsInLine(line, skipChars).map((_, number, line))
       }.toSeq
+
     }
   }
-
 }
+
