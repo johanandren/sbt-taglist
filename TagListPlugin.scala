@@ -88,10 +88,10 @@ object TagListPlugin extends Plugin {
       val (valid, _) = lines.foldLeft((Seq[String](), false)) ({ case ((acc, comment), line) =>
         val trimmed = line.trim
         if (comment) {
-          if (trimmed.contains("*/")) {
-            if (trimmed.endsWith("*/")) {
+          if (trimmed.contains(r)) {
+            if (trimmed.endsWith(r)) {
               (line +: acc, false)
-            } else if (trimmed.startsWith("*/")) {
+            } else if (trimmed.startsWith(r)) {
               (acc, false)
             } else {
               (line +: acc,  balanced(line))
