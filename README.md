@@ -25,5 +25,5 @@ The plugin uses the regular source settings for your sbt-project so it should wo
 
 If you want to change what keywords the plugin searches for you can do so by modifying tagWords like this in PROJECT_DIR/build.sbt:
 
-    TagListPlugin.TagListKeys.tagWords := Set("wha", "oughtaimprove", "noway", "bad code")
+    TagListPlugin.TagListKeys.tagWords := Set("wha", "oughtaimprove", "noway")
 
