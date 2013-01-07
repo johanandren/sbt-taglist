@@ -24,7 +24,7 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
     add(word.toList, this)
   }
 
-  def contains(word: String, skipChars:Set[Char]): Boolean = {
+  def contains(word: String, skipChars:Set[Char] = Set()): Boolean = {
     @tailrec
     def exists(word: List[Char], trie: Trie): Boolean = word match {
       // end of given word, is that node in the trie marked as a word?

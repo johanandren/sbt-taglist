@@ -33,6 +33,15 @@ class TrieSpec extends Specification {
       trie.contains("murder") must beFalse
     }
 
+    "skip characters" in {
+      val trie = Trie() :+ "wo" :+ "wi" :+ "wizard"
+
+      val skip = Set('/')
+      trie.contains("//wo", skip) must beTrue
+      trie.contains("//wi", skip) must beTrue
+      trie.contains("//wizard", skip) must beTrue
+    }
+
   }
 
 }
