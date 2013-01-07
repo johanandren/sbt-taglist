@@ -26,11 +26,10 @@ object TagListPlugin extends Plugin {
     (sources: Seq[File], tagWords: Set[String], streams: TaskStreams, skipChars:Set[Char]) => {
       val tagList = FileParser.generateTagList(sources, tagWords, skipChars)
 
-      val count = tagList.foldLeft(0) { (acc, tags) =>
-        acc + tags._2.length
+      val count = tagList.map(_._2.size).sum
+      if (count > 0) {
+        streams.log.warn("Tags found: %s" format count)
       }
-
-      streams.log.warn("Tags found: %s" format count)
 
       for (
         (file, tags) <- tagList;
