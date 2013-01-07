@@ -23,7 +23,7 @@ object TagListPlugin extends Plugin {
   )
 
   lazy val tagListTask = tagList <<= (sources in Compile, tagWords, streams, skipChars) map {
-    case (sources: Seq[File], tagWords: Set[String], streams: TaskStreams, skipChars:Set[Char]) => {
+    (sources: Seq[File], tagWords: Set[String], streams: TaskStreams, skipChars:Set[Char]) => {
       val tagList = FileParser.generateTagList(sources, tagWords, skipChars)
 
       val count = tagList.foldLeft(0) { (acc, tags) =>
