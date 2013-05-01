@@ -2,7 +2,7 @@ sbtPlugin := true
 
 name := "taglist-plugin"
 
-version := "1.2-SNAPSHOT"
+version := "1.2"
 
 organization := "com.markatta"
 
