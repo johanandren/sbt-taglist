@@ -6,6 +6,8 @@ version := "1.3-SNAPSHOT"
 
 organization := "com.markatta"
 
+crossScalaVersions := Seq("2.9.2", "2.10.1")
+
 scalacOptions += "-unchecked"
 
 publishTo <<= version { (v: String) =>
