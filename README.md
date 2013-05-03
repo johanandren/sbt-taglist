@@ -23,7 +23,8 @@ And then this line to PROJECT_DIR/build.sbt to include the task tag-list into yo
 # Configuration
 The plugin uses the regular source settings for your sbt-project so it should work out of the box with non-standard directory structures etc. 
 
-Default tag words are "todo" and "fixme". If you want to change what keywords the plugin searches for you can do so
-by modifying tagWords like this in PROJECT_DIR/build.sbt:
+1.3:
+Default tag words are "todo" and "fixme" both at Warn log level. If you want to change what keywords the plugin searches for or what
+level they are logged at you can do so by modifying tagWords like this in PROJECT_DIR/build.sbt:
 
-    TagListPlugin.TagListKeys.tagWords := Set("wha", "oughtaimprove", "noway")
+    TagListPlugin.TagListKeys.tagWords := Set(Tag("todo", TagListPlugin.Info), Tag("fixme", TagListPlugin.Warn))

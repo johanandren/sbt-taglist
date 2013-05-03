@@ -39,25 +39,14 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
       }
     }
 
-    def skip(word:List[Char]) = {
-      def drop(c:List[Char]) = skipChars.foldLeft(c) { (acc, w) =>
-        acc.dropWhile(_ == w)
-      } 
 
-      drop(drop(word).reverse).reverse
-    }
-
-    exists(skip(word.toList), this)
+    exists(word.toList, this)
   }
-
-  def containsAnyIn(line: String, skipChars:Set[Char] = Set()): Boolean =
-    line.split(" ").exists(contains(_, skipChars))
 
 }
 
 object Trie {
 
-  def apply(words: Iterable[String]): Trie =
-    words.foldLeft(Trie()){(trie, word) => trie :+ word }
+  def apply(words: Iterable[String]): Trie = words.foldLeft(Trie()){(trie, word) => trie :+ word }
 
 }
