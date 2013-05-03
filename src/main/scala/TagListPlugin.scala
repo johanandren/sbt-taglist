@@ -60,7 +60,7 @@ object TagListPlugin extends Plugin {
     val trie = Trie(tags.map(_.word.toLowerCase))
     val logLevelPerWord: Map[Word, LogLevel] = tags.map(t => t.word.toLowerCase -> t.level).toMap
 
-    files.map { file =>
+    files.par.map { file =>
 
       val lines = Source.fromFile(file).getLines()
       val matchesInFile = lines.zipWithIndex.foldLeft(Seq[(LineNumber, Line, LogLevel)]()) { case (acc, (line, lineNumber)) =>
@@ -78,7 +78,7 @@ object TagListPlugin extends Plugin {
       }
 
       file -> matchesInFile
-    }
+    }.seq
 
   }
 
