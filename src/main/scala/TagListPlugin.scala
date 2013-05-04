@@ -1,4 +1,4 @@
-import com.markatta.sbttaglist.Trie
+import com.markatta.sbttaglist.{TextUtils, Trie}
 import io.Source
 import sbt._
 import Keys._
@@ -62,11 +62,12 @@ object TagListPlugin extends Plugin {
 
     files.par.map { file =>
 
-      val lines = Source.fromFile(file).getLines()
-      val matchesInFile = lines.zipWithIndex.foldLeft(Seq[(LineNumber, Line, LogLevel)]()) { case (acc, (line, lineNumber)) =>
+      val linesWithIndexes = Source.fromFile(file).getLines().zipWithIndex
+
+      val matchesInFile = linesWithIndexes.foldLeft(Seq[(LineNumber, Line, LogLevel)]()) { case (acc, (line, lineNumber)) =>
 
         val foundWordsInLine = line.toLowerCase.split(' ').foldLeft(Seq[Word]()) { (wordAcc, word) =>
-          val cleanWord = dropFromBothEnds(word.toList, skipChars).mkString
+          val cleanWord = TextUtils.dropFromBothEnds(word.toList, skipChars).mkString
           if (trie.contains(cleanWord))
             wordAcc :+ cleanWord
           else
@@ -82,26 +83,5 @@ object TagListPlugin extends Plugin {
 
   }
 
-  private def dropFromBothEnds(word: List[Char], skipChars: Set[Char]): List[Char] = {
-    def skipLeading(word: List[Char]) =
-      word.dropWhile(skipChars(_))
 
-    if (word.nonEmpty) {
-      val cleanLeading =
-        if (skipChars(word.head))
-          skipLeading(word)
-        else
-          word
-
-      val cleanEnd =
-        if (cleanLeading.nonEmpty && skipChars(cleanLeading.last))
-          skipLeading(cleanLeading.reverse).reverse
-        else
-          cleanLeading
-
-      cleanEnd
-    } else {
-      word
-    }
-  }
 }
