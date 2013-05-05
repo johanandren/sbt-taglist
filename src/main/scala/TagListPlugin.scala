@@ -21,7 +21,8 @@ object TagListPlugin extends Plugin {
   case class Tag(word: Word, level: LogLevel = Warn)
 
   object TagListKeys {
-    val tagWords = SettingKey[Set[Tag]]("tag-list-words", "Tag words to look for when searching for tagged files")
+    val tagWords = SettingKey[Set[String]]("tag-list-words", "Tag words to look for when searching for tagged files")
+    val tags = SettingKey[Set[Tag]]("tag-list-tags", "Detailed tags with a log level per tag word")
     val skipChars = SettingKey[Set[Char]]("tag-list-skip-chars", "Characters to skip around tag words")
     val tagList = TaskKey[TagList]("tag-list", "Display all TODO tags in the sources of the project")
   }
@@ -30,11 +31,12 @@ object TagListPlugin extends Plugin {
 
   lazy val tagListSettings = Seq(
     tagListTask,
-    tagWords := Set(Tag("todo"), Tag("fixme")),
+    tagWords := Set("todo", "fixme"),
+    tags <<= tagWords(_.map(word => Tag(word, Warn))),
     skipChars := Set('/', ':')
   )
 
-  lazy val tagListTask = tagList <<= (sources in Compile, tagWords, streams, skipChars) map {
+  lazy val tagListTask = tagList <<= (sources in Compile, tags, streams, skipChars) map {
     (sources: Seq[File], tagWords: Set[Tag], streams: TaskStreams, skipChars: Set[Char]) => {
       val tagList = generateTagList(sources, tagWords, skipChars)
 
