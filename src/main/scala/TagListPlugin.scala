@@ -1,4 +1,5 @@
-import com.markatta.sbttaglist.{TextUtils, Trie}
+package com.markatta.sbttaglist
+
 import io.Source
 import sbt._
 import Keys._

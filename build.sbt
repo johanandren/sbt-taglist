@@ -6,7 +6,9 @@ version := "1.3-SNAPSHOT"
 
 organization := "com.markatta"
 
-crossScalaVersions := Seq("2.9.2", "2.10.1")
+crossBuildingSettings
+
+CrossBuilding.crossSbtVersions := Seq("0.12", "0.13")
 
 scalacOptions += "-unchecked"
 
