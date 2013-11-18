@@ -17,24 +17,25 @@ Add the following lines to ~/.sbt/plugins/build.sbt or PROJECT_DIR/project/plugi
 
 And then this line to PROJECT_DIR/build.sbt to include the task tag-list into your project:
 
-    seq(TagListPlugin.tagListSettings: _*)
 
+```
+import com.markatta.sbttaglist.TagListPlugin
+
+TagListPlugin.tagListSettings
+```
 
 # Configuration
 The plugin uses the regular source settings for your sbt-project so it should work out of the box with non-standard directory structures etc. 
 
-1.2
-Default tag words are "todo" and "fixme". If you want to change what keywords the plugin searches for or what
-level they are logged at you can do so by modifying tagWords like this in PROJECT_DIR/build.sbt:
-     
-TagListPlugin.TagListKeys.tagWords := Seq("incorrect", "plainwrong", "dontcheckin")
-
-
-1.3-SNAPSHOT:
+###1.3:
 The default tags looked for are "todo" and "fixme". To override those you can either just simply set a list of words,
 all of them will yield warnings in the log when found:
 
-    TagListPlugin.TagListKeys.tagWords := Seq("incorrect", "plainwrong", "dontcheckin")
+```
+import com.markatta.sbttaglist.TagListPlugin
+
+TagListPlugin.TagListKeys.tagWords := Seq("incorrect", "plainwrong", "dontcheckin")
+```
 
 Or if it better suits your needs you can specify each word along with a log level:
 
