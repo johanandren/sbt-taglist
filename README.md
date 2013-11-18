@@ -12,7 +12,7 @@ Add the following lines to ~/.sbt/plugins/build.sbt or PROJECT_DIR/project/plugi
 
     resolvers += "sbt-taglist-releases" at "http://johanandren.github.com/releases/"
 
-    addSbtPlugin("com.markatta" % "taglist-plugin" % "1.2")
+    addSbtPlugin("com.markatta" % "taglist-plugin" % "1.3")
 
 
 And then this line to PROJECT_DIR/build.sbt to include the task tag-list into your project:
