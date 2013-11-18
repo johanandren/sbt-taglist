@@ -1,1 +1,3 @@
-addSbtPlugin("net.virtual-void" % "sbt-cross-building" % "0.7.0-RC2")
+resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+
+addSbtPlugin("net.virtual-void" % "sbt-cross-building" % "0.8.0")
