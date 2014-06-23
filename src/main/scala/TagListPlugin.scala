@@ -1,6 +1,6 @@
 package com.markatta.sbttaglist
 
-import io.Source
+import scala.io.{Codec, Source}
 import sbt._
 import Keys._
 
@@ -26,6 +26,7 @@ object TagListPlugin extends Plugin {
     val tags = SettingKey[Set[Tag]]("tag-list-tags", "Detailed tags with a log level per tag word")
     val skipChars = SettingKey[Set[Char]]("tag-list-skip-chars", "Characters to skip around tag words")
     val tagList = TaskKey[TagList]("tag-list", "Display all TODO tags in the sources of the project")
+    val tagsSourceEncoding = SettingKey[Codec]("tags-source-encoding", "The encoding of the sources")
   }
 
   import TagListKeys._
@@ -34,12 +35,13 @@ object TagListPlugin extends Plugin {
     tagListTask,
     tagWords := Set("todo", "fixme"),
     tags <<= tagWords(_.map(word => Tag(word, Warn))),
-    skipChars := Set('/', ':')
+    skipChars := Set('/', ':'),
+    tagsSourceEncoding := Codec("UTF-8")
   )
 
-  lazy val tagListTask = tagList <<= (sources in Compile, tags, streams, skipChars) map {
-    (sources: Seq[File], tagWords: Set[Tag], streams: TaskStreams, skipChars: Set[Char]) => {
-      val tagList = generateTagList(sources, tagWords, skipChars)
+  lazy val tagListTask = tagList <<= (sources in Compile, tags, streams, skipChars, tagsSourceEncoding) map {
+    (sources: Seq[File], tagWords: Set[Tag], streams: TaskStreams, skipChars: Set[Char], encoding: Codec) => {
+      val tagList = generateTagList(sources, tagWords, skipChars, encoding)
 
       val count = tagList.map(_._2.size).sum
       if (count > 0) {
@@ -58,14 +60,14 @@ object TagListPlugin extends Plugin {
 
   }
 
- private def generateTagList(files: Seq[File], tags: Set[Tag], skipChars: Set[Char]): TagList = {
+ private def generateTagList(files: Seq[File], tags: Set[Tag], skipChars: Set[Char], sourceEncoding: Codec): TagList = {
 
     val trie = Trie(tags.map(_.word.toLowerCase))
     val logLevelPerWord: Map[Word, LogLevel] = tags.map(t => t.word.toLowerCase -> t.level).toMap
 
     files.par.map { file =>
 
-      val linesWithIndexes = Source.fromFile(file).getLines().zipWithIndex
+      val linesWithIndexes = Source.fromFile(file)(sourceEncoding).getLines().zipWithIndex
 
       val matchesInFile = linesWithIndexes.foldLeft(Seq[(LineNumber, Line, LogLevel)]()) { case (acc, (line, lineNumber)) =>
 
