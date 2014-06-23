@@ -18,10 +18,12 @@ crossBuildingSettings
 
 CrossBuilding.crossSbtVersions := Seq("0.12", "0.13")
 
+scalaVersion := "2.10.0"
+
 scalacOptions += "-unchecked"
 
 libraryDependencies ++= Seq(
-  "org.specs2" %% "specs2" % "1.11" % "test"
+  "org.specs2" %% "specs2" % "2.3.12" % "test"
 )
 
 resolvers ++= Seq("releases"  at "http://oss.sonatype.org/content/repositories/releases")
