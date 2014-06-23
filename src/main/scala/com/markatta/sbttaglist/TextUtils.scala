@@ -1,7 +1,5 @@
 package com.markatta.sbttaglist
 
-import scala.util.parsing.combinator.JavaTokenParsers
-
 object TextUtils {
 
   def dropFromBothEnds(word: Seq[Char], charsToDrop: Set[Char]): Seq[Char] = {
