@@ -9,7 +9,7 @@ of a project for a set of keywords. The default keywords are "todo" and "fixme"
 # Installation
 
 The plugin is available from the community sbt-plugins repository on bintray, add a dependency on it in your project
-(a common place is PROJECT_DIR/plugins.sbt):
+(a common place is PROJECT_DIR/project/plugins.sbt):
 
     addSbtPlugin("com.markatta" % "taglist-plugin" % "1.3.1")
 
