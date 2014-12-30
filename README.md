@@ -1,4 +1,5 @@
 # About
+[![Build Status](https://travis-ci.org/johanandren/sbt-taglist.svg?branch=master)](https://travis-ci.org/johanandren/sbt-taglist)
 
 Small SBT plugin that will contain roughly the functionality of the maven-tag-list plugin when done.
 
