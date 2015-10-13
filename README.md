@@ -37,5 +37,5 @@ TagListPlugin.TagListKeys.tagWords := Seq("incorrect", "plainwrong", "dontchecki
 
 Or if it better suits your needs you can specify each word along with a log level:
 
-    TagListPlugin.TagListKeys.tags := Seq(Tag("todo", TagListPlugin.Info), Tag("fixme", TagListPlugin.Info))
+    TagListPlugin.TagListKeys.tags := Set(Tag("todo", TagListPlugin.Info), Tag("fixme", TagListPlugin.Info))
 
