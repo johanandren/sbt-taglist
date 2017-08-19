@@ -3,3 +3,6 @@ jdk:
 language: scala
 scala:
   - 2.12.3
+script:
+  - sbt "^ test"
+  - sbt "^ scripted"
