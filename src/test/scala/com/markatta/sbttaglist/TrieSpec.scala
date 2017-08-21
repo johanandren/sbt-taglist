@@ -1,36 +1,36 @@
 package com.markatta.sbttaglist
 
-import org.specs2.mutable._
+import org.scalatest.{Matchers, WordSpec}
 
-class TrieSpec extends Specification {
+class TrieSpec extends WordSpec with Matchers {
 
   "A Trie" should {
 
     "be created" in {
       val result = Trie() :+ "wo" :+ "wi"
 
-      result.children.size mustEqual (1)
+      result.children.size should === (1)
       val w = result.children('w')
-      w.children.size mustEqual (2)
+      w.children.size should === (2)
       val o = w.children('o')
-      o.children.size mustEqual (0)
-      o.isWord must beTrue
+      o.children.size should === (0)
+      o.isWord should === (true)
       val i = w.children('i')
-      i.children.size mustEqual (0)
-      i.isWord must beTrue
+      i.children.size should === (0)
+      i.isWord should === (true)
     }
 
     "find defined strings" in {
       val trie = Trie() :+ "wo" :+ "wi" :+ "wizard"
 
-      trie.contains("wo") must beTrue
-      trie.contains("wi") must beTrue
-      trie.contains("wizard") must beTrue
+      trie.contains("wo") should === (true)
+      trie.contains("wi") should === (true)
+      trie.contains("wizard") should === (true)
     }
 
     "not find undefined strings" in {
       val trie = Trie() :+ "wo" :+ "wi" :+ "wizard"
-      trie.contains("murder") must beFalse
+      trie.contains("murder") should === (false)
     }
 
   }

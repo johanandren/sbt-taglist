@@ -1,13 +1,13 @@
 package com.markatta.sbttaglist
 
-import org.specs2.mutable.Specification
+import org.scalatest.{Matchers, WordSpec}
 
-class TextUtilSpec extends Specification {
+class TextUtilSpec extends WordSpec with Matchers {
 
   "The TextUtils" should {
 
     "strip characters from both ends of a string" in {
-      TextUtils.dropFromBothEnds(":word:", Set(':')) must beEqualTo ("word".toSeq)
+      TextUtils.dropFromBothEnds(":word:", Set(':')) should === ("word".toSeq)
     }
 
   }
