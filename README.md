@@ -12,7 +12,7 @@ of a project for a set of keywords. The default keywords are "todo" and "fixme"
 The plugin is available from the community sbt-plugins repository on bintray, add a dependency on it in your project
 (a common place is PROJECT_DIR/project/plugins.sbt):
 
-    addSbtPlugin("com.markatta" % "taglist-plugin" % "1.4.0")
+    addSbtPlugin("com.markatta" % "sbt-taglist" % "1.4.0")
 
 # Configuration
 The plugin uses the regular source settings for your sbt-project so it should work out of the box with non-standard directory structures etc. 
