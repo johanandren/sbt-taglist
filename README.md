@@ -17,7 +17,7 @@ The plugin is available from the community sbt-plugins repository on bintray, ad
 # Configuration
 The plugin uses the regular source settings for your sbt-project so it should work out of the box with non-standard directory structures etc. 
 
-###1.4+:
+### 1.4+:
 
 In 1.4 all settings where renamed to be prefixed with `tagList` to not cause conflicts in the key namespace. This means the setting `tagWords` now is `tagListWords` etc. 
 
@@ -27,7 +27,7 @@ The default settings only looks for tags in `src/main/scala`. To configure addit
 sources in tagList := (sources in Compile).value ++ (sources in Test).value
 ```
 
-###1.3+:
+### 1.3+:
 The default tags looked for are "todo" and "fixme". To override those you can either just simply set a list of words,
 all of them will yield warnings in the log when found:
 
