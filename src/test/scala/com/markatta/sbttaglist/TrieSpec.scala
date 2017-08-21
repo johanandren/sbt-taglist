@@ -23,14 +23,14 @@ class TrieSpec extends WordSpec with Matchers {
     "find defined strings" in {
       val trie = Trie() :+ "wo" :+ "wi" :+ "wizard"
 
-      trie.contains("wo") should === (true)
-      trie.contains("wi") should === (true)
-      trie.contains("wizard") should === (true)
+      trie.contains("wo".iterator) should === (true)
+      trie.contains("wi".iterator) should === (true)
+      trie.contains("wizard".iterator) should === (true)
     }
 
     "not find undefined strings" in {
       val trie = Trie() :+ "wo" :+ "wi" :+ "wizard"
-      trie.contains("murder") should === (false)
+      trie.contains("murder".iterator) should === (false)
     }
 
   }

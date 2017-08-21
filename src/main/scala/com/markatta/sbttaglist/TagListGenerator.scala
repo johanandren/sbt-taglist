@@ -3,6 +3,7 @@ package com.markatta.sbttaglist
 import com.markatta.sbttaglist.TagListPlugin._
 import sbt.File
 
+import scala.collection.mutable
 import scala.io.{Codec, Source}
 
 object TagListGenerator {
@@ -12,25 +13,23 @@ object TagListGenerator {
     val logLevelPerWord: Map[Word, LogLevel] = tags.map(t => t.word.toLowerCase -> t.level).toMap
 
     files.par.map { file =>
+      var lineNumber = 0
+      val lines = Source.fromFile(file)(sourceEncoding).getLines()
+      val matchesInFile = mutable.Buffer.empty[(LineNumber, Line, LogLevel)]
 
-      val linesWithIndexes = Source.fromFile(file)(sourceEncoding).getLines().zipWithIndex
-
-      val matchesInFile = linesWithIndexes.foldLeft(Seq[(LineNumber, Line, LogLevel)]()) { case (acc, (line, lineNumber)) =>
-
-        val foundWordsInLine = line.toLowerCase.split(' ').foldLeft(Seq[Word]()) { (wordAcc, word) =>
-          val cleanWord = TextUtils.dropFromBothEnds(word.toList, skipChars).mkString
-          if (trie.contains(cleanWord))
-            wordAcc :+ cleanWord
-          else
-            wordAcc
+      while (lines.hasNext) {
+        lineNumber += 1
+        val line = lines.next()
+        val wordIterator = line.toLowerCase.split(' ').iterator
+        while(wordIterator.hasNext) {
+          val cleanWord = TextUtils.dropFromBothEnds(wordIterator.next(), skipChars)
+          if (trie.contains(cleanWord.iterator)) {
+            matchesInFile.append((lineNumber, line, logLevelPerWord(cleanWord.mkString)))
+          }
         }
-
-
-        acc ++ foundWordsInLine.map(word => (lineNumber, line, logLevelPerWord(word)))
       }
 
       file -> matchesInFile
     }.seq
-
   }
 }

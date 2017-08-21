@@ -1,7 +1,7 @@
 sbtPlugin := true
 name := "sbt-taglist"
 description := "Plugin to look for TODO, FIXME or some other tags in your sources"
-git.baseVersion := "1.4.1-SNAPSHOT"
+git.baseVersion := "1.4.1"
 organization := "com.markatta"
 publishMavenStyle := false
 crossSbtVersions := Seq("1.0.0", "0.13.16")

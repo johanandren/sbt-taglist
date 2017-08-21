@@ -24,23 +24,24 @@ case class Trie(children: Map[Char, Trie] = Map(), isWord: Boolean = false) {
     add(word.toList, this)
   }
 
-  def contains(word: String, skipChars:Set[Char] = Set()): Boolean = {
+  def contains(word: Iterator[Char], skipChars:Set[Char] = Set()): Boolean = {
     @tailrec
-    def exists(word: List[Char], trie: Trie): Boolean = word match {
-      // end of given word, is that node in the trie marked as a word?
-      case Nil => trie.isWord
+    def exists(word: Iterator[Char], trie: Trie): Boolean =
+      if (word.hasNext) {
+        val head = word.next()
+        trie.children.get(head) match {
+          // word does not exist in trie
+          case None => false
 
-      case head :: tail => trie.children.get(head) match {
-        // word does not exist in trie
-        case None => false
-
-        // word this far exists in trie
-        case Some(nextTrie) => exists(tail, nextTrie)
+          // word this far exists in trie
+          case Some(nextTrie) => exists(word, nextTrie)
+        }
+      } else {
+        // end of given word, is that node in the trie marked as a word?
+        trie.isWord
       }
-    }
 
-
-    exists(word.toList, this)
+    exists(word, this)
   }
 
 }
