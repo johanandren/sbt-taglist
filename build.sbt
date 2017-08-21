@@ -13,6 +13,6 @@ libraryDependencies ++= Seq(
 resolvers ++= Seq("releases"  at "http://oss.sonatype.org/content/repositories/releases")
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 bintrayRepository := "sbt-plugins"
-bintrayOrganization in bintray := None
+bintrayOrganization := None
 
 enablePlugins(GitVersioning)
